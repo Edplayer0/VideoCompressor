@@ -57,8 +57,8 @@ jobs:
         run: |
           set -e
           ffmpeg -y -i "${{ steps.download.outputs.input_file }}" \
-            -c:v libx265 -crf 32 -preset slow \
-            -vf "fps=24,scale=-2:240" \
+            -c:v libx265 -crf 36 -preset slow \
+            -vf "fps=30,scale=-2:144" \
             -c:a aac -b:a 96k \
             -movflags +faststart \
             output.mp4
@@ -82,7 +82,7 @@ jobs:
           curl -s -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d "chat_id=${{ github.event.inputs.chat_id }}" \
-            -d "text=✅ Video comprimido (360p, 24fps, 96kbps): ${{ steps.upload.outputs.link }}"
+            -d "text=✅ Video comprimido con éxito: ${{ steps.upload.outputs.link }}"
 
       - name: Notify Telegram (failure)
         if: failure()
@@ -90,7 +90,7 @@ jobs:
           curl -s -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d "chat_id=${{ github.event.inputs.chat_id }}" \
-            -d "text=❌ Falló la compresión. Revisa los logs del workflow."
+            -d "text=❌ Fallo durante la compresión."
 
       - name: Cleanup cookies
         if: always()
