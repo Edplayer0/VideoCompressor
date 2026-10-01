@@ -57,10 +57,10 @@ jobs:
         run: |
           set -e
           ffmpeg -y -i "${{ steps.download.outputs.input_file }}" \
+            -map 0:v:0 -map 0:a \
             -c:v libx265 -crf 36 -preset slow \
             -vf "fps=30,scale=-2:144" \
-            -c:a aac -b:a 96k \
-            -movflags +faststart \
+            -c:a aac -ac 2 -b:a 96k \
             output.mp4
 
           ls -lh output.mp4
