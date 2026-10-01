@@ -24,6 +24,9 @@ jobs:
       - name: Setup yt-dlp with FFmpeg
         uses: AnimMouse/setup-yt-dlp@v3
 
+      - name: Write YouTube cookies
+        run: echo "${{ secrets.YOUTUBE_COOKIES }}" > cookies.txt
+
       - name: Download video
         id: download
         run: |
@@ -37,6 +40,7 @@ jobs:
             echo "🎬 Enlace de plataforma detectado, descargando con yt-dlp..."
             yt-dlp \
               --no-playlist \
+              --cookies cookies.txt \
               -f "bv*+ba/b" \
               --merge-output-format mp4 \
               -o "input.%(ext)s" \
@@ -87,3 +91,7 @@ jobs:
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             -d "chat_id=${{ github.event.inputs.chat_id }}" \
             -d "text=❌ Falló la compresión. Revisa los logs del workflow."
+
+      - name: Cleanup cookies
+        if: always()
+        run: rm -f cookies.txt
