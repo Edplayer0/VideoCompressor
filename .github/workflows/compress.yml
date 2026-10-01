@@ -15,7 +15,7 @@ on:
 jobs:
   compress:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -57,7 +57,7 @@ jobs:
         run: |
           set -e
           ffmpeg -y -i "${{ steps.download.outputs.input_file }}" \
-            -c:v libx265 -crf 30 -preset slow \
+            -c:v libx265 -crf 32 -preset slow \
             -vf "fps=24,scale=-2:240" \
             -c:a aac -b:a 96k \
             -movflags +faststart \
