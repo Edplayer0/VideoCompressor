@@ -65,29 +65,11 @@ jobs:
 
           ls -lh output.mp4
 
-      - name: Upload to bashupload
+      - name: Upload to EasySend
         id: upload
-        run: |
-          set -e
-
-          if [ ! -s output.mp4 ]; then
-            echo "❌ output.mp4 no existe o está vacío"
-            exit 1
-          fi
-
-          echo "📦 Tamaño del archivo: $(du -h output.mp4 | cut -f1)"
-
-          RESPONSE=$(curl -s --max-time 600 bashupload.com -T output.mp4)
-          LINK=$(echo "$RESPONSE" | grep -oP 'https?://bashupload\.com/\S+' | head -1)
-
-          if [[ ! "$LINK" =~ ^https?:// ]]; then
-            echo "❌ bashupload no devolvió una URL válida:"
-            echo "$RESPONSE" | head -c 500
-            exit 1
-          fi
-
-          echo "✅ Enlace generado: $LINK"
-          echo "link=$LINK" >> $GITHUB_OUTPUT
+        uses: easysend-co/share@v1
+        with:
+          files: output.mp4
 
       - name: Notify Telegram (success)
         if: success()
@@ -95,7 +77,7 @@ jobs:
           curl -s -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
             --data-urlencode "chat_id=${{ github.event.inputs.chat_id }}" \
-            --data-urlencode "text=✅ Video comprimido con éxito: ${{ steps.upload.outputs.link }}"
+            --data-urlencode "text=✅ Video comprimido: https://easysend.co${{ steps.upload.outputs.share-url }}"
 
       - name: Notify Telegram (failure)
         if: failure()
@@ -108,4 +90,3 @@ jobs:
       - name: Cleanup cookies
         if: always()
         run: rm -f cookies.txt
-
