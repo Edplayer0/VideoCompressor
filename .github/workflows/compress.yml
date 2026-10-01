@@ -65,33 +65,47 @@ jobs:
 
           ls -lh output.mp4
 
-      - name: Upload to litterbox
+      - name: Upload to bashupload
         id: upload
         run: |
           set -e
-          LINK=$(curl -s -F "reqtype=fileupload" \
-                      -F "time=72h" \
-                      -F "fileToUpload=@output.mp4" \
-                      https://litterbox.catbox.moe/resources/internals/api.php)
+
+          if [ ! -s output.mp4 ]; then
+            echo "❌ output.mp4 no existe o está vacío"
+            exit 1
+          fi
+
+          echo "📦 Tamaño del archivo: $(du -h output.mp4 | cut -f1)"
+
+          RESPONSE=$(curl -s --max-time 600 bashupload.com -T output.mp4)
+          LINK=$(echo "$RESPONSE" | grep -oP 'https?://bashupload\.com/\S+' | head -1)
+
+          if [[ ! "$LINK" =~ ^https?:// ]]; then
+            echo "❌ bashupload no devolvió una URL válida:"
+            echo "$RESPONSE" | head -c 500
+            exit 1
+          fi
+
+          echo "✅ Enlace generado: $LINK"
           echo "link=$LINK" >> $GITHUB_OUTPUT
-          echo "Enlace generado: $LINK"
 
       - name: Notify Telegram (success)
         if: success()
         run: |
           curl -s -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ github.event.inputs.chat_id }}" \
-            -d "text=✅ Video comprimido con éxito: ${{ steps.upload.outputs.link }}"
+            --data-urlencode "chat_id=${{ github.event.inputs.chat_id }}" \
+            --data-urlencode "text=✅ Video comprimido con éxito: ${{ steps.upload.outputs.link }}"
 
       - name: Notify Telegram (failure)
         if: failure()
         run: |
           curl -s -X POST \
             "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
-            -d "chat_id=${{ github.event.inputs.chat_id }}" \
-            -d "text=❌ Fallo durante la compresión."
+            --data-urlencode "chat_id=${{ github.event.inputs.chat_id }}" \
+            --data-urlencode "text=❌ Fallo durante la compresión."
 
       - name: Cleanup cookies
         if: always()
         run: rm -f cookies.txt
+
