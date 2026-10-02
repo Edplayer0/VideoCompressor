@@ -1,8 +1,12 @@
 import os
 import re
 import time
+import sqlite
+
 import requests
 from dotenv import load_dotenv
+
+from db_manager import db_manager
 
 load_dotenv()
 
@@ -69,6 +73,9 @@ def handle_message(msg):
     chat_id = msg["chat"]["id"]
     text = msg.get("text", "").strip()
 
+    if not db_manager.verify_id(chat_id):
+        return
+
     if not text:
         send_message(chat_id, "Mándame un enlace de video para comprimir.")
         return
@@ -107,7 +114,7 @@ def main():
                     handle_message(msg)
                 except Exception as e:
                     print(f"[handle_message] {e}")
-        time.sleep(1)
+        time.sleep(2)
 
 
 if __name__ == "__main__":
