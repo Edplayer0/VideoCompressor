@@ -1,7 +1,6 @@
 import os
 import re
 import time
-import sqlite
 
 import requests
 from dotenv import load_dotenv
