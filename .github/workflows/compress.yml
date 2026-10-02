@@ -63,7 +63,7 @@ jobs:
             -pix_fmt yuv420p \
             -c:a aac -ac 2 -b:a 32k \
             -movflags +faststart \
-           output.mp4
+            output.mp4
 
           ls -lh output.mp4
 
@@ -79,7 +79,8 @@ jobs:
 
           echo "📦 Tamaño: $(du -h output.mp4 | cut -f1)"
 
-          RESPONSE=$(curl -s --max-time 600 -X POST \
+          RESPONSE=$(curl -s --http1.1 --retry 3 --retry-all-errors --retry-delay 5 \
+            --max-time 600 -X POST \
             -F "files[]=@output.mp4" \
             https://easysend.co/api/v1/upload)
 
