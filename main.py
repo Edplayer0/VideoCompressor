@@ -82,14 +82,13 @@ def handle_message(msg):
     if text.startswith("/start"):
         send_message(
             chat_id,
-            "👋 Mándame un enlace (YouTube, TikTok, Twitter, o un .mp4 directo) "
-            "y te devuelvo el video comprimido a 360p."
+            "👋 Bienvenido a Video Compress\n\n 🔗 Envíame un enlace directo de un video o de alguna red social, me encargo de descargarlo y comprimirlo.\n📲 Múltiples plataformas soportadas, ejemplo:\n -YouTube\n -TikTok\n -Intagram\n -Muchos más\n\n💛 Que disfrutes"
         )
         return
 
     match = URL_RE.search(text)
     if not match:
-        send_message(chat_id, "No detecté ningún enlace. Mándame una URL válida.")
+        send_message(chat_id, "❓ No detecté ningún enlace. Mándame una URL válida.")
         return
 
     video_url = match.group(0)
@@ -103,17 +102,20 @@ def handle_message(msg):
 def main():
     print("🤖 Bot iniciado. Esperando mensajes...")
     offset = None
-    while True:
-        updates = get_updates(offset)
-        for update in updates.get("result", []):
-            offset = update["update_id"] + 1
-            msg = update.get("message")
-            if msg:
-                try:
-                    handle_message(msg)
-                except Exception as e:
-                    print(f"[handle_message] {e}")
-        time.sleep(2)
+    try:
+        while True:
+            updates = get_updates(offset)
+            for update in updates.get("result", []):
+                offset = update["update_id"] + 1
+                msg = update.get("message")
+                if msg:
+                    try:
+                        handle_message(msg)
+                    except Exception as e:
+                        print(f"[handle_message] {e}")
+            time.sleep(2)
+    finally:
+        db_manager.close()
 
 
 if __name__ == "__main__":
