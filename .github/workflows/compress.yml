@@ -11,6 +11,10 @@ on:
         description: "Chat ID de Telegram donde responder"
         required: true
         type: string
+      scale:
+        description: "Escala de salida (altura en píxeles)"
+        required: true
+        type: string
 
 jobs:
   compress:
@@ -59,7 +63,7 @@ jobs:
           ffmpeg -y -i "${{ steps.download.outputs.input_file }}" \
             -map 0:v:0 -map 0:a \
             -c:v libx264 -crf 32 -preset slow \
-            -vf "fps=24,scale=-2:144" \
+            -vf "fps=24,scale=-2:${{ github.event.inputs.scale }}" \
             -c:a aac -ac 2 -b:a 32k \
             output.mp4
 
