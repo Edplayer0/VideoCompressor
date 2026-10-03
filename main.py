@@ -145,7 +145,7 @@ def handle_message(msg):
 
     message_id = send_message_with_keyboard(
         chat_id,
-        "🎚️ Selecciona la escala de salida:",
+        "🗜️ Selecciona la escala de salida:",
         teclado_escalas()
     )
 
@@ -178,8 +178,6 @@ def handle_callback(cq):
     if not info:
         edit_message(chat_id, message_id, "⚠️ Sesión expirada. Manda el enlace otra vez.")
         return
-
-    edit_message(chat_id, message_id, f"⏳ Procesando en {escala}p...")
 
     if trigger_workflow(info["video_url"], chat_id, escala):
         edit_message(chat_id, message_id, f"⏳ Procesando en {escala}p. Te aviso cuando esté listo.")
